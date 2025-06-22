@@ -13,10 +13,13 @@ export default function Home() {
     setResult(null);
     try {
       const res = await fetch(`/api/domain?name=${domain}`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
       const data = await res.json();
       setResult(data);
-    } catch (err) {
-      setResult({ error: "Something went wrong." });
+    } catch (err: any) {
+      setResult({ error: "Something went wrong.", detail: err.message });
     } finally {
       setLoading(false);
     }
@@ -57,7 +60,7 @@ export default function Home() {
       {result && (
         <div className="mt-6 bg-white p-4 rounded shadow max-w-md w-full">
           {result.error ? (
-            <p className="text-red-500">{result.error}</p>
+            <p className="text-red-500">{result.error}{result.detail ? `: ${result.detail}` : ""}</p>
           ) : (
             <>
               <p><strong>Auction:</strong> {formatUSD(result.valuation.auction)}</p>
