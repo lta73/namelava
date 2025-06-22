@@ -2,13 +2,24 @@
 
 import { useState } from "react";
 
+const validTLDs = ["com", "net", "org", "io", "ai", "co", "xyz"];
+
 export default function Home() {
   const [domain, setDomain] = useState("");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  const isValidDomain = (input: string) => {
+    const match = input.match(/\.([a-z]{2,})$/i);
+    return match ? validTLDs.includes(match[1].toLowerCase()) : false;
+  };
+
   const handleSubmit = async () => {
     if (!domain.trim()) return;
+    if (!isValidDomain(domain.trim())) {
+      setResult({ error: "Invalid domain TLD. Only valid domains are accepted." });
+      return;
+    }
     setLoading(true);
     setResult(null);
     try {
