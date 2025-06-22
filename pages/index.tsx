@@ -26,6 +26,7 @@ export default function Home() {
   };
 
   const formatUSD = (num: number) => {
+    if (num === 0) return "$0";
     return num.toLocaleString("en-US", {
       style: "currency",
       currency: "USD",
@@ -63,14 +64,14 @@ export default function Home() {
             <p className="text-red-500">{result.error}{result.detail ? `: ${result.detail}` : ""}</p>
           ) : (
             <>
-              <p><strong>Auction:</strong> {result.valuation ? formatUSD(result.valuation.auction) : "N/A"}</p>
-              <p><strong>Marketplace:</strong> {result.valuation ? formatUSD(result.valuation.market) : "N/A"}</p>
-              <p><strong>Broker:</strong> {result.valuation ? formatUSD(result.valuation.broker) : "N/A"}</p>
+              <p><strong>Auction:</strong> {typeof result.valuation?.auction === 'number' ? formatUSD(result.valuation.auction) : "N/A"}</p>
+              <p><strong>Marketplace:</strong> {typeof result.valuation?.market === 'number' ? formatUSD(result.valuation.market) : "N/A"}</p>
+              <p><strong>Broker:</strong> {typeof result.valuation?.broker === 'number' ? formatUSD(result.valuation.broker) : "N/A"}</p>
               <div className="mt-2 text-sm text-gray-700 whitespace-pre-line">
                 <strong>Explanation:</strong>
-                <p>{result.explanation}</p>
+                <p>{result.explanation || "No explanation available."}</p>
               </div>
-              {result.valuation && result.valuation.auction === 0 &&
+              {typeof result.valuation?.auction === 'number' && result.valuation.auction === 0 &&
                 typeof result.explanation === 'string' &&
                 result.explanation.toLowerCase().includes("brand") && (
                   <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded">
