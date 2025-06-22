@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(JSON.parse(cached));
     }
 
-    const prompt = `Estimate the fair valuation for the domain name \"${domain}\" in three categories: auction price, marketplace price, and broker price. Also explain the reasoning behind this valuation. Respond in this strict JSON format:\n{\n  \"auction\": number,\n  \"market\": number,\n  \"broker\": number,\n  \"reasoning\": string\n}\nIf the domain is a trademarked brand or cannot be valued, set all prices to 0 and explain why.`;
+    const prompt = `Estimate the fair valuation for the domain name "${domain}" in three categories: auction price, marketplace price, and broker price.\n\nExplain your reasoning based on the domain name's intrinsic qualities (length, keywords, TLD, etc.).\n\nIf the domain is known to be in use by a famous brand or company, please still provide the valuation *as if it were available*, but include a disclaimer: \"This domain is currently used by a brand. The price does not reflect its brand equity or existing web traffic value.\"\n\nIf the domain clearly includes a registered brand name (e.g. dysoncleaners.com, facebookmarketing.com), warn: \"This domain includes a well-known brand name and may face legal challenges.\"\n\nReturn in this strict JSON format:\n{\n  "auction": number,\n  "market": number,\n  "broker": number,\n  "reasoning": string\n}`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4',

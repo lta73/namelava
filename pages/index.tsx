@@ -1,4 +1,5 @@
 // pages/index.tsx
+
 import { useState } from "react";
 
 export default function Home() {
@@ -19,6 +20,14 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatUSD = (num: number) => {
+    return num.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    });
   };
 
   return (
@@ -51,19 +60,18 @@ export default function Home() {
             <p className="text-red-500">{result.error}</p>
           ) : (
             <>
-              <p><strong>Auction Price:</strong> ${result.valuation.auction.toLocaleString()}</p>
-              <p><strong>Marketplace Price:</strong> ${result.valuation.market.toLocaleString()}</p>
-              <p><strong>Broker Price:</strong> ${result.valuation.broker.toLocaleString()}</p>
-              {result.valuation.auction === 0 &&
-                result.valuation.market === 0 &&
-                result.valuation.broker === 0 && (
-                  <p className="text-red-500 mt-2">⚠️ Cannot estimate due to trademark conflict.</p>
-              )}
-              <div className="mt-2">
-                <p className="text-sm text-gray-700 whitespace-pre-line">
-                  <strong>Explanation:</strong> {result.explanation}
-                </p>
+              <p><strong>Auction:</strong> {formatUSD(result.valuation.auction)}</p>
+              <p><strong>Marketplace:</strong> {formatUSD(result.valuation.market)}</p>
+              <p><strong>Broker:</strong> {formatUSD(result.valuation.broker)}</p>
+              <div className="mt-2 text-sm text-gray-700 whitespace-pre-line">
+                <strong>Explanation:</strong>
+                <p>{result.explanation}</p>
               </div>
+              {result.valuation.auction === 0 && result.explanation.toLowerCase().includes("brand") && (
+                <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded">
+                  ⚠️ This domain may include or conflict with a known brand name.
+                </div>
+              )}
             </>
           )}
         </div>
