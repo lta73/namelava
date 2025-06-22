@@ -67,10 +67,12 @@ export default function Home() {
                 <strong>Explanation:</strong>
                 <p>{result.explanation}</p>
               </div>
-              {result.valuation.auction === 0 && result.explanation.toLowerCase().includes("brand") && (
-                <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded">
-                  ⚠️ This domain may include or conflict with a known brand name.
-                </div>
+              {result.valuation.auction === 0 &&
+                typeof result.explanation === 'string' &&
+                result.explanation.toLowerCase().includes("brand") && (
+                  <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded">
+                    ⚠️ This domain may include or conflict with a known brand name.
+                  </div>
               )}
             </>
           )}
