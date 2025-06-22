@@ -22,41 +22,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(JSON.parse(cached));
     }
 
-    const prompt = `You're a domain valuation assistant. Evaluate the domain \"${domain}\".
-
-Return ONLY a JSON object with these keys:
-{
-  \"domain\": \"${domain}\",
-  \"auction\": 3500,
-  \"marketplace\": 4000,
-  \"broker\": 4500,
-  \"explanation\": \"Explain the domain's value here.\"
-}
-
-Do not add any extra text or comment. Only return valid JSON.`;
+    const prompt = `Estimate the fair valuation for the domain name \"${domain}\" in three categories: auction price, marketplace price, and broker price. Also explain the reasoning behind this valuation. Respond in this strict JSON format:\n{\n  \"auction\": number,\n  \"market\": number,\n  \"broker\": number,\n  \"reasoning\": string\n}\nIf the domain is a trademarked brand or cannot be valued, set all prices to 0 and explain why.`;
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const gptOutput = completion.choices[0].message?.content || '';
+    const text = completion.choices[0].message?.content || '';
+    const parsed = JSON.parse(text);
 
-    try {
-      const json = JSON.parse(gptOutput);
-      const safe = {
-        domain,
-        auction: Number(json.auction) || 0,
-        marketplace: Number(json.marketplace) || 0,
-        broker: Number(json.broker) || 0,
-        explanation: json.explanation || 'No explanation provided.',
-      };
+    const formatted = {
+      valuation: {
+        auction: parsed.auction || 0,
+        market: parsed.market || 0,
+        broker: parsed.broker || 0,
+      },
+      explanation: parsed.reasoning || '',
+    };
 
-      await redis.set(domain, JSON.stringify(safe));
-      return res.status(200).json(safe);
-    } catch (err) {
-      return res.status(500).json({ error: 'GPT output could not be parsed.' });
-    }
+    await redis.set(domain, JSON.stringify(formatted));
+    return res.status(200).json(formatted);
   } catch (error: any) {
     return res.status(500).json({ error: 'Error generating valuation', detail: error.message });
   }

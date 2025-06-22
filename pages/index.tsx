@@ -6,19 +6,12 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(price);
-
   const handleSubmit = async () => {
     if (!domain.trim()) return;
     setLoading(true);
     setResult(null);
     try {
-      const res = await fetch(`/api/domain?name=${encodeURIComponent(domain)}`);
+      const res = await fetch(`/api/domain?name=${domain}`);
       const data = await res.json();
       setResult(data);
     } catch (err) {
@@ -30,7 +23,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen p-8 bg-gray-100 flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-4">🔥 NameLava - Domain Valuator</h1>
+      <h1 className="text-3xl font-bold mb-4">NameLava 🔥</h1>
       <input
         type="text"
         placeholder="Enter a domain (e.g. namelava.com)"
@@ -38,7 +31,10 @@ export default function Home() {
         value={domain}
         onChange={(e) => setDomain(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === "Enter") handleSubmit();
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit();
+          }
         }}
       />
       <button
@@ -55,11 +51,19 @@ export default function Home() {
             <p className="text-red-500">{result.error}</p>
           ) : (
             <>
-              <p><strong>Domain:</strong> {domain}</p>
-              <p><strong>Auction Price:</strong> {formatPrice(result.auction)}</p>
-              <p><strong>Marketplace Price:</strong> {formatPrice(result.marketplace)}</p>
-              <p><strong>Broker Price:</strong> {formatPrice(result.broker)}</p>
-              <p><strong>Explanation:</strong> {result.reasoning}</p>
+              <p><strong>Auction Price:</strong> ${result.valuation.auction.toLocaleString()}</p>
+              <p><strong>Marketplace Price:</strong> ${result.valuation.market.toLocaleString()}</p>
+              <p><strong>Broker Price:</strong> ${result.valuation.broker.toLocaleString()}</p>
+              {result.valuation.auction === 0 &&
+                result.valuation.market === 0 &&
+                result.valuation.broker === 0 && (
+                  <p className="text-red-500 mt-2">⚠️ Cannot estimate due to trademark conflict.</p>
+              )}
+              <div className="mt-2">
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  <strong>Explanation:</strong> {result.explanation}
+                </p>
+              </div>
             </>
           )}
         </div>
