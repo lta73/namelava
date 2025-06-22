@@ -63,14 +63,14 @@ export default function Home() {
             <p className="text-red-500">{result.error}{result.detail ? `: ${result.detail}` : ""}</p>
           ) : (
             <>
-              <p><strong>Auction:</strong> {formatUSD(result.valuation.auction)}</p>
-              <p><strong>Marketplace:</strong> {formatUSD(result.valuation.market)}</p>
-              <p><strong>Broker:</strong> {formatUSD(result.valuation.broker)}</p>
+              <p><strong>Auction:</strong> {result.valuation ? formatUSD(result.valuation.auction) : "N/A"}</p>
+              <p><strong>Marketplace:</strong> {result.valuation ? formatUSD(result.valuation.market) : "N/A"}</p>
+              <p><strong>Broker:</strong> {result.valuation ? formatUSD(result.valuation.broker) : "N/A"}</p>
               <div className="mt-2 text-sm text-gray-700 whitespace-pre-line">
                 <strong>Explanation:</strong>
                 <p>{result.explanation}</p>
               </div>
-              {result.valuation.auction === 0 &&
+              {result.valuation && result.valuation.auction === 0 &&
                 typeof result.explanation === 'string' &&
                 result.explanation.toLowerCase().includes("brand") && (
                   <div className="mt-2 p-2 bg-yellow-100 text-yellow-800 rounded">
