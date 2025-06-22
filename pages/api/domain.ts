@@ -1,39 +1,49 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { OpenAI } from 'openai';
-import Redis from 'ioredis';
-import { generatePrompt } from '@/utils/generatePrompt';
+// pages/api/domain.ts
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const redis = new Redis(process.env.REDIS_URL as string);
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Configuration, OpenAIApi } from 'openai';
+import Redis from 'ioredis';
+
+const config = new Configuration({ apiKey: process.env.OPENAI\_API\_KEY });
+const openai = new OpenAIApi(config);
+const redis = new Redis(process.env.REDIS\_URL!);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const domain = req.query.domain as string;
+const { name } = req.query;
 
-  if (!domain) {
-    return res.status(400).json({ error: 'Missing domain query parameter' });
-  }
+if (!name || typeof name !== 'string') {
+return res.status(400).json({ error: 'Missing domain query parameter' });
+}
 
-  const cacheKey = `domain:${domain}`;
-  const cached = await redis.get(cacheKey);
+const domain = name.trim().toLowerCase();
 
-  if (cached) {
-    console.log('✅ Cache hit');
-    return res.status(200).json(JSON.parse(cached));
-  }
+try {
+const cached = await redis.get(domain);
+if (cached) {
+return res.status(200).json(JSON.parse(cached));
+}
 
-  console.log('🧠 Calling OpenAI for fresh valuation...');
-  const prompt = generatePrompt(domain);
+```
+const prompt = `Evaluate the brand value of the domain ${domain} in USD, with a short reasoning. Format as JSON with keys 'valuation' and 'reasoning'.`;
 
-  const completion = await openai.chat.completions.create({
-    messages: [{ role: 'user', content: prompt }],
-    model: 'gpt-4',
-    temperature: 0.7,
-  });
+const completion = await openai.createChatCompletion({
+  model: 'gpt-4',
+  messages: [
+    {
+      role: 'user',
+      content: prompt,
+    },
+  ],
+});
 
-  const result = completion.choices[0].message.content;
-  const parsed = JSON.parse(result!);
+const text = completion.data.choices[0].message?.content || '';
+const parsed = JSON.parse(text);
 
-  await redis.set(cacheKey, JSON.stringify(parsed), 'EX', 60 * 60 * 24 * 30); // 30 days
+await redis.set(domain, JSON.stringify(parsed));
+return res.status(200).json(parsed);
+```
 
-  return res.status(200).json(parsed);
+} catch (error: any) {
+return res.status(500).json({ error: 'Error generating valuation', detail: error.message });
+}
 }
