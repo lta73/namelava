@@ -24,7 +24,7 @@ return res.status(200).json(JSON.parse(cached));
 }
 
 ```
-const prompt = `Evaluate the brand value of the domain ${domain} in USD, with a short reasoning. Format as JSON with keys 'valuation' and 'reasoning'.`;
+const prompt = `Evaluate the brand value of the domain '${domain}' in USD. Return JSON with keys: "auctionPrice", "marketplacePrice", "brokerPrice", and "explanation". Use realistic ranges and write in plain English.`;
 
 const completion = await openai.createChatCompletion({
   model: 'gpt-4',
@@ -34,12 +34,19 @@ const completion = await openai.createChatCompletion({
       content: prompt,
     },
   ],
+  temperature: 0.7,
 });
 
 const text = completion.data.choices[0].message?.content || '';
-const parsed = JSON.parse(text);
 
-await redis.set(domain, JSON.stringify(parsed));
+let parsed;
+try {
+  parsed = JSON.parse(text);
+} catch (e) {
+  return res.status(500).json({ error: 'Failed to parse AI response', raw: text });
+}
+
+await redis.set(domain, JSON.stringify(parsed), 'EX', 60 * 60 * 24); // Cache for 24h
 return res.status(200).json(parsed);
 ```
 
