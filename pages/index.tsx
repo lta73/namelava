@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white text-black p-4">
       <h1 className="text-4xl font-bold mb-4">NameLava 🔥</h1>
-      <form onSubmit={handleSubmit} className="flex space-x-2">
+      <form onSubmit={handleSubmit} className="flex space-x-2 mb-6">
         <input
           type="text"
           value={domain}
@@ -29,6 +29,8 @@ export default function Home() {
           Estimate
         </button>
       </form>
+
+      <p className="text-gray-500 text-sm">Explore domain value instantly with AI insights. 🔍</p>
     </div>
   );
 }
