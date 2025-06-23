@@ -1,20 +1,22 @@
+// File: pages/domain/[name].tsx
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 export default function DomainResult() {
   const router = useRouter();
-  const { domain } = router.query;
+  const { name } = router.query;
 
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [inputDomain, setInputDomain] = useState('');
 
   useEffect(() => {
-    if (!domain) return;
-    setInputDomain(domain as string);
+    if (!name) return;
+    setInputDomain(name as string);
     const fetchData = async () => {
       try {
-        const res = await fetch(`/api/domain?name=${domain}`);
+        const res = await fetch(`/api/domain?name=${name}`);
         const data = await res.json();
         setResult(data);
       } catch (error) {
@@ -24,7 +26,7 @@ export default function DomainResult() {
       }
     };
     fetchData();
-  }, [domain]);
+  }, [name]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,11 +59,16 @@ export default function DomainResult() {
         <p className="text-red-500">{result.error}</p>
       ) : (
         <div className="bg-gray-100 p-4 rounded shadow max-w-md w-full">
-          <p><strong>Valuation:</strong> {result.valuation}</p>
-          <p><strong>Reasoning:</strong> {result.reasoning}</p>
-          {result.warning && (
-            <p className="text-yellow-600 mt-2">⚠️ {result.warning}</p>
-          )}
+          <p><strong>Auction:</strong> {result.auction}</p>
+          <p><strong>Marketplace:</strong> {result.marketplace}</p>
+          <p><strong>Broker:</strong> {result.broker}</p>
+          <div className="mt-4">
+            <p className="font-semibold">Explanation:</p>
+            <p>{result.reasoning}</p>
+            {result.warning && (
+              <p className="text-yellow-600 mt-2">⚠️ {result.warning}</p>
+            )}
+          </div>
         </div>
       )}
     </div>
