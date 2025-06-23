@@ -23,7 +23,9 @@ export default function Drops({ domains }: Props) {
           <ul className="space-y-2">
             {domains.map((item, index) => (
               <li key={index} className="flex justify-between border-b pb-1 text-sm">
-                <span>{item.domain}</span>
+                import Link from 'next/link'; // Đảm bảo có dòng này ở đầu file
+
+<Link href=
                 <span className="text-gray-400">{item.dropDate}</span>
               </li>
             ))}
